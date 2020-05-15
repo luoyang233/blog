@@ -6,15 +6,15 @@
 
 旁边的小伙伴遇到一个bug，这个bug是这么一个情况，这里有一个上传文件到服务器的功能，一开始是这样的
 
-<img src="/Users/luoyang/Library/Application Support/typora-user-images/image-20200515162556067.png" alt="image-20200515162556067" style="zoom:50%;" />
+![image-20200515162556067.png](https://github.com/luoyang233/blog/blob/master/React/别用index作为key/image-20200515162556067.png)
 
 然后上传了一张图片，中间出现了奇怪的闪烁，有那么一丢丢的时间，前面71开头的图片变成了word文档的图标？？然后新上传的图片变成了前一张图片的缩略图？？最后一个又成空白了？？？
 
-<img src="/Users/luoyang/Library/Application Support/typora-user-images/image-20200515164731168.png" alt="image-20200515164731168" style="zoom:50%;" />
+![image-20200515164731168.png](https://github.com/luoyang233/blog/blob/master/React/别用index作为key/image-20200515164731168.png)
 
 后来变成了他该有的样子样子
 
-<img src="/Users/luoyang/Library/Application Support/typora-user-images/image-20200515163503325.png" alt="image-20200515163503325" style="zoom:50%;" />
+![image-20200515163503325.png](https://github.com/luoyang233/blog/blob/master/React/别用index作为key/image-20200515163503325.png)
 
 虽然中间过程很短，但既然被测试发现了，那它就是bug了（看不见就算了）
 
