@@ -1,4 +1,4 @@
-
+# 别用index作为key
 
 之前在学习react的时候看过关于key的一些注意事项，官网的意思就是在万不得已的时候不要用索引来当作key，有时候图省事不以为然，直到今天踩了个坑才意识到别用index当key！别用index当key！真别用index当key！
 
