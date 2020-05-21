@@ -79,6 +79,8 @@ module.exports = {
 - 当mode为`development`时也就是开发环境，打包结果当然不用那么精细，你给我快点打包完，我好去调试就行了
 - 当mode为`production`时也就是生产环境，要求就是压缩压缩再压缩，这个时候再去看看bundle.js，就会发现这不是人类能读懂的了
 
+
+
 这里讲讲打包原理，不感兴趣可以跳过
 
 ---
@@ -115,21 +117,21 @@ function(modules){
 	var cache=[] //已加载过的模块
    // ========================================
 	function require(id){
-     if(cache[id]) {
-       return cache[id].export
-     }
-		 const module={
-       export:{},
-       id,
-       loaded:false
-     }
-  modules[id].call(module.export,module.module.export,require)
-	module.loaded=true
-  return module.export
+    if(cache[id]) {
+      return cache[id].export
+    }
+    const module={
+      export:{},
+      id,
+      loaded:false
+    }
+    modules[id].call(module.export,module.module.export,require)
+    module.loaded=true
+    return module.export
 	}
   // ========================================
   //...中间省略一些其他东西
-	return require(0)
+  return require(0)
 })([fn0,fn1,fn2,...])
 ```
 
