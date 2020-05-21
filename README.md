@@ -7,3 +7,5 @@
 ## 前端工程化
 
 [白话讲webpack（一）](https://github.com/luoyang233/blog/blob/master/engineering/webpack1.md)
+
+[白话讲webpack（二）](https://github.com/luoyang233/blog/blob/master/engineering/webpack2.md)
