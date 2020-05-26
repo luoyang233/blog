@@ -289,7 +289,7 @@ You may need an appropriate loader to handle this file type, currently no loader
 
 这个时候就需要有一个能转换.md文件的loader，假如还没人写这个loader呢？
 
-这个时候就需要自己动手了，写个简单的demo
+那就需要自己动手了，写个简单的demo
 
 ```javascript
 //my-md-loader.js
@@ -307,6 +307,42 @@ module.exports=source=>{
 - 现在可以把README.md的文件内容直接看作`export default 'hello,world!'`
 - 注意这里不一定非要导出，比如这里可以直接返回`return ''hello world''`,注意这里是两个引号，交出去的相当于就是`'hello world'`，但是现在，在代码中就无法直接使用了，对引入它的index.js来说，该README.md就是一行写有'hello world'的js文件，其他啥都没有，连导出都没有，当然不能用
 - 接上一条，这个时候就需要更多的loader了，那么下一个loader接受到的就是`'hello world'`，然后再进行各种骚操作。。。
+
+最后配置一下
+
+```javascript
+const path = require('path')
+module.exports = {
+    entry: './src/index.js',
+    output: {
+        filename: 'bundle.js',
+        path: path.resolve(__dirname, 'dist')
+    },
+    mode: 'development',
+    module: {
+        rules: [
+            {
+                test: /\.css$/,
+                use: [
+                    { loader: 'style-loader' },
+                    {
+                        loader: 'css-loader',
+                        options: {
+                            modules: true
+                        }
+                    }
+                ]
+            },
+          {
+            test: /\.md/,
+            use:['./my-md-loader','othder1-loader','othder2-loader']
+          }
+        ]
+    }
+}
+```
+
+
 
 说完了～
 
