@@ -203,7 +203,110 @@ function(modules){
 
 妙吗？或许这就是高级coder和程序猿的区别吧！
 
----
+### loader
 
-未完。。
+> 首先我们要明白，单是webpack本身，只能打包js代码，那么其他的各种资源，包括图片格式，或者.less/.jsx之类的文件类型，总不可能出一门技术标准，webpack就更新一次吧，这就引出了我们**webpack的核心 -- loader**
+
+loader是啥？
+
+把它理解为一个转换小工具吧，那么webpack其实不能算是打包工具，他算是一个工具盒，拧梅花螺丝需要梅花螺丝刀吧，拧平口螺丝需要平口螺丝刀，这里的loader其实就如同前面的螺丝刀，webpack就是装loader的工具盒
+
+- 例如打包css文件，我们需要某种打包css的loader，比如`css-loader`
+
+  所以我们需要把它引入项目中
+
+  ```
+  npm install css-loader --save-dev
+  ```
+
+- css文件打包完成后，我们想让他直接放入html的style中，以减少css文件的请求，这个时候就需要`style-loader`
+
+  ```
+  npm install style-loader --save-dev
+  ```
+
+接下来就是使用它了
+
+```javascript
+const path = require('path')
+module.exports = {
+    entry: './src/index.js',
+    output: {
+        filename: 'bundle.js',
+        path: path.resolve(__dirname, 'dist')
+    },
+    mode: 'development',
+    module: {
+        rules: [
+            {
+                test: /\.css$/,
+                use: [
+                    { loader: 'style-loader' },
+                    {
+                        loader: 'css-loader',
+                        options: {
+                            modules: true
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}
+```
+- 通过module来引入loader配置
+- rules接受一个数组，里面是各种loader匹配各种文件的使用规则
+- test接受一个正则表达式，即表明这个loader只在匹配到.css文件的时候用
+- use则是表明使用哪一种loader，**顺序为从后到前**，这里的配置为：匹配到.css文件先使用css-loader，接着css-loader转换后的文件再交给style-loader继续转换
+- use的顺序一定不能乱，比如这里的顺序颠倒，那就是先执行style-loader，后执行css-loader，先没学会走路，就直接跑了，肯定会报错
+- options则是针对css-loader的配置
+
+### 深入一下loader的原理
+
+> loader的原理其实很简单，loader链要求最终返回一段js代码即可
+
+比如我们在文件中引入了一个README.md文件，这个时候打包，webpack肯定不认识
+
+```javascript
+//index.js
+import readme from './README.md'
+	foo=()=>{
+  	console.log(readme)
+	}
+
+//README.md
+#hello 
+world
+
+//npx webpack 控制台报错
+ERROR in ./src/README.md 1:0
+Module parse failed: Unexpected character '#' (1:0)
+You may need an appropriate loader to handle this file type, currently no loaders are configured to process this file. See https://webpack.js.org/concepts#loaders
+> # hello
+| world
+ @ ./src/index.js 2:0-32 7:14-20
+```
+
+这个时候就需要有一个能转换.md文件的loader，假如还没人写这个loader呢？
+
+这个时候就需要自己动手了，写个简单的demo
+
+```javascript
+//my-md-loader.js
+
+//注意这里一定要用CommonJS规范，因为loader是在node环境中运行
+module.exports=source=>{
+	//这里的source其实就是README中的所有内容
+  //'# hello\n\world'
+  return 'export default 'hello,world!''
+}
+```
+
+- 这里的source包含了.md文件中的所有内容
+- loader返回**字符串**，但字符串的内容是一段**js代码**，返回的就是经过loader处理后交出去的
+- 现在可以把README.md的文件内容直接看作`export default 'hello,world!'`
+- 注意这里不一定非要导出，比如这里可以直接返回`return ''hello world''`,注意这里是两个引号，交出去的相当于就是`'hello world'`，但是现在，在代码中就无法直接使用了，对引入它的index.js来说，该README.md就是一行写有'hello world'的js文件，其他啥都没有，连导出都没有，当然不能用
+- 接上一条，这个时候就需要更多的loader了，那么下一个loader接受到的就是`'hello world'`，然后再进行各种骚操作。。。
+
+说完了～
 
