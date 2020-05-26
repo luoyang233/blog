@@ -335,7 +335,7 @@ module.exports = {
             },
           {
             test: /\.md/,
-            use:['./my-md-loader','othder1-loader','othder2-loader']
+            use:['othder1-loader','othder2-loader','./my-md-loader']
           }
         ]
     }
