@@ -344,5 +344,64 @@ module.exports = {
 
 
 
-说完了～
+### plugin
 
+> plugin也就是webpack的插件机制，也是webpack的核心
+
+#### 与loader的区别
+
+plugin与loader容易混淆，其实也很好区分
+
+- loader是作用于各个资源模块的加载，可以理解为作用于代码层面
+- plugin则是作用于整个打包过程，比如开始打包之前，利用plugin可以自动删除上次打包的结果，打包完成后还可以压缩文件。。。类似于AOP（面向切面编程）
+
+#### 举个🌰
+
+自动删除上次打包的dist文件内容
+
+首先引入插件的npm包
+
+```
+npm i clean-webpack-plugin -D
+```
+
+```javascript
+const path = require('path')
+const { CleanWebpackPlugin } = require('clean-webpack-plugin')
+
+module.exports = {
+    entry: './src/index.js',
+    mode:'development',
+    output: {
+        filename: 'bundle.js',
+        path: path.resolve(__dirname, 'dist'),
+      },
+    module: {
+        rules: [
+            {
+                test: /\.css$/, 
+                use: [
+                    'style-loader',
+                    'css-loader'
+                ] 
+            },
+        ]
+    },
+    plugins:[
+        new CleanWebpackPlugin(),
+    ]
+}
+
+
+```
+
+- 这里的CleanWebpackPlugin是通过解构而来，有些plugin是直接默认导出
+- plugins接受一个数组
+- 通过创建一个插件的实例对象使用插件
+- 插件配置一般通过new对象传参的形式
+
+在`npx webpack`后可以看到上一次打包的dist目录中的内容被完全替换
+
+
+
+~ 完了
