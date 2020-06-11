@@ -4,6 +4,8 @@
 
 [白话讲webpack（三）](https://github.com/luoyang233/blog/blob/master/engineering/webpack3.md)
 
+[白话讲webpack（四）](https://github.com/luoyang233/blog/blob/master/engineering/webpack4.md)
+
 > 接上一篇，对webpack有了一个大体的认识，但真正落到实处的东西，可不是几句口水话就能说清楚的。这篇文章就是对webpack配置文件做简单的介绍
 
 ## 准备工作

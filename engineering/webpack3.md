@@ -4,6 +4,8 @@
 
 [白话讲webpack（二）](https://github.com/luoyang233/blog/blob/master/engineering/webpack2.md)
 
+[白话讲webpack（四）](https://github.com/luoyang233/blog/blob/master/engineering/webpack4.md)
+
 > 该篇是介绍webpack在实战中常用的热替换机制（HMR）
 
 ## 为何需要HMR

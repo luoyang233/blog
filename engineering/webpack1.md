@@ -4,6 +4,8 @@
 
 [白话讲webpack（三）](https://github.com/luoyang233/blog/blob/master/engineering/webpack3.md)
 
+[白话讲webpack（四）](https://github.com/luoyang233/blog/blob/master/engineering/webpack4.md)
+
 > 之前一直苦于看不懂webpack的文档，暂时放弃了学习，估计很多和我一样的小白，都是还没开始就结束了，所以我决定结合自身，边学边记录，出一篇能让小白完全读懂的webpack资料。
 >
 > 文中部分见解引自于拉勾网中的 *Webpack原理与实践 - 汪磊*
