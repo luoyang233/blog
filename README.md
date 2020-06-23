@@ -14,4 +14,9 @@
 
 [白话讲webpack（四）](https://github.com/luoyang233/blog/blob/master/engineering/webpack4.md)
 
-[如何理解IaaS、SaaS、PaaS）](https://github.com/luoyang233/blog/blob/master/engineering/service.md)
+[如何理解IaaS、SaaS、PaaS](https://github.com/luoyang233/blog/blob/master/engineering/service.md)
+
+## 随便记录一下
+
+[什么是OAuth2.0](https://github.com/luoyang233/blog/blob/master/others/oauth2.md)
+
