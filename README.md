@@ -4,6 +4,8 @@
 
 [初识Angular（一）](https://github.com/luoyang233/blog/blob/master/angular/angular1.md)
 
+[理解表单数据流](https://github.com/luoyang233/blog/blob/master/angular/form1.md)
+
 ## 关于React
 
 [别用index作为key](https://github.com/luoyang233/blog/blob/master/react/key.md)
