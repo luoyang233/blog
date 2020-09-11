@@ -6,6 +6,8 @@
 
 [理解表单数据流](https://github.com/luoyang233/blog/blob/master/angular/form1.md)
 
+[electron+angular环境搭建](https://github.com/luoyang233/blog/blob/master/angular/electron1.md)
+
 ## 关于React
 
 [别用index作为key](https://github.com/luoyang233/blog/blob/master/react/key.md)
