@@ -37,13 +37,8 @@ const {app, BrowserWindow} = require('electron')
         }
       })
 
-      mainWindow.loadURL(
-        url.format({
-          pathname: path.join(__dirname, `/dist/index.html`),
-          protocol: "file:",
-          slashes: true
-        })
-      );
+     win.loadFile(path.join(__dirname, `/dist/index.html`));
+      
       // Open the DevTools.
       mainWindow.webContents.openDevTools()
 
@@ -106,13 +101,61 @@ Not allowed to load local resource: file:///Users/luoyang/Code/td-demo/src/dist/
 所以改一下`el-main.ts`中的`.hmtl`的文件地址就行了
 
 ```javascript
-mainWindow.loadURL(
-    url.format({
-      // 这里是更改后的地址，加了一个/td-demo
-      pathname: path.join(__dirname, `../dist/td-demo/index.html`),
-      protocol: "file:",
-      slashes: true
-    })
-  );
+// 这里是更改后的地址，加了一个/td-demo
+win.loadFile(path.join(__dirname, `/dist/td-demo/index.html`));
 ```
 
+### 关于热更新
+
+完成了以上步骤可以开始开发，但并不贴合实际的开发过程
+
+electron每次是去读取的dist输出目录的东西，也就是说需要在每次更改后去build，并重新加载，这样做太麻烦了
+
+electron的桌面有两种加载方式
+
+```javascript
+ // 直接读取dist文件
+  win.loadFile(path.join(__dirname, `/dist/td-demo/index.html`));
+
+  // 监听端口
+  win.loadURL('http://localhost:4200');
+```
+
+- 一种是直接读取dist文件，这也是我们上面的加载的方式
+- 另一种是直接监听端口，也就是相当于直接把网页上的内容映射下来
+
+因为我们选用的技术栈是angular，所以不需要自己去配置热更，这一点很方便，所以我们接下来要做的就是像往常一样，直接在网页中开发angular就行了，代码变更后angular自动刷新，接着electron读取到端口变更后的内容，自动就会映射在桌面端上面
+
+所以我们在开发过程中只需要采用监听端口的形式就可以了，在`main.ts`文件中做以下更改
+
+```javascript
+	// 将加载文件的方式注释了
+  // win.loadFile(path.join(__dirname, `/dist/td-demo/index.html`));
+
+  // 开发时监听端口
+  win.loadURL('http://localhost:4200');
+```
+
+接下来要做的可以理解为我们在开发一个angular应用，然后electron的桌面端只是一面镜子，同步映射网页的内容而已（暂时粗俗的这样理解吧）
+
+所以我们要做的就是，在正常的`ng serve`的基础上多开一个electron的监听
+
+```json
+//package.json
+
+"start": "ng serve && electron ."
+```
+
+如果就如上面的方式去运行，会出现一些问题，当`ng serve`运行监听后会阻塞后面的执行，导致`electron .`无法执行，所以这里引入了一个npm包`npm install concurrently --save-dev`
+
+```json
+//package.json
+
+"start": "concurrently 'ng serve' 'electron .'",
+```
+
+这样就能一次性执行两个监听了
+
+> P.S.这里还是有点问题，初次加载`ng serve`比`electron .`慢，所以electron桌面会先加载出来并且一片空白，等ng加载完成后需要手动去刷新一下，暂时未解决。。
+
+接下来就可以按照开发angualr同样的方式去开发electron了
