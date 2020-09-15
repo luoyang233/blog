@@ -159,3 +159,66 @@ electron的桌面有两种加载方式
 > P.S.这里还是有点问题，初次加载`ng serve`比`electron .`慢，所以electron桌面会先加载出来并且一片空白，等ng加载完成后需要手动去刷新一下，暂时未解决。。
 
 接下来就可以按照开发angualr同样的方式去开发electron了
+
+---
+
+更新
+
+说一下刚一上手就遇到的坑点
+
+在angular的ts文件引入渲染进程需要用到的`import { ipcRenderer } from 'electron';`
+
+```typescript
+import { Component, OnInit } from '@angular/core';
+//注意这里
+import { ipcRenderer } from 'electron';
+
+
+@Component({
+	selector: 'app-upload',
+	templateUrl: './upload.component.html',
+	styleUrls: ['./upload.component.less']
+})
+export class UploadComponent implements OnInit {
+
+	constructor() { }
+
+	ngOnInit(): void {
+		ipcRenderer.on('selected-directory', (event, path) => {
+			document.getElementById('selected-file').innerHTML = `你已选择: ${path}`
+		})
+	}
+
+	onClick() {
+		ipcRenderer.send('open-file-dialog')
+	}
+
+}
+```
+
+然后就成功报错了
+
+```
+ERROR in ./node_modules/electron/index.js
+Module not found: Error: Can't resolve 'fs' in '/Users/luoyang/Code/td-demo/node_modules/electron'
+
+ERROR in ./node_modules/electron/index.js
+Module not found: Error: Can't resolve 'path' in '/Users/luoyang/Code/td-demo/node_modules/electron'
+```
+
+大概意思就是在electron的npm包中找不到这两个模块
+
+搜索了网上一大圈，找到了解题思路：**更改webpack中的target配置**，因为在electron的npm包中内部引入了node环境中的path模块和fs模块，如果按照正常的浏览器环境编译，将是找不到这两个模块的
+
+问题又来了，angular在6之后（好像是吧）隐藏了webpack文件，所以我们需要引入另一个包去更改webpack的配置
+
+```
+npm i @angular-builders/custom-webpack
+```
+
+配置的的方式参考[这篇文章](https://blog.csdn.net/sllailcp/article/details/103233903)
+
+值得注意的是：**记住把`build`和`serve`两种模式一并更改了**
+
+网上几乎都没提到这一点，血和泪总结出来的经验，因为在开发过程中用到的是`ng serve`，开发完成打包后用到`ng build`，所以不管怎样，这样两个都是必须要的，否则就无法正常运行。
+
