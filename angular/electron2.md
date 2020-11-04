@@ -32,6 +32,9 @@
 			"typeRoots": [
 					"../node_modules/@types"  // 引入 .d.ts 文件
 			],
+    	"types": [
+					"node"
+			],
 	},
 	"include": [
 			"electron-main.ts",
