@@ -10,6 +10,10 @@
 
 [electron+angular环境搭建（二）](https://github.com/luoyang233/blog/blob/master/angular/electron2.md)
 
+[可观察对象（Observable）的基本用法](https://github.com/luoyang233/blog/blob/master/angular/observable1.md)
+
+
+
 ## 关于React
 
 [别用index作为key](https://github.com/luoyang233/blog/blob/master/react/key.md)
