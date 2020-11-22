@@ -99,7 +99,74 @@ paperFactory.subscribe(nextFn,errFn,completeFn);
 
 假如出现了第二个订阅者，如果还是以前面的方式进行发布，那么就会出现这种现象，订阅者订阅一次，被订阅函数就执行一次（每个订阅者得到的对象都是相互独立的，这在有些时候可以这样做），换成前面的例子，也就是说只要出现一个定报纸的人，那工厂马上就要印一份送到用户手中，那工厂还干不干？
 
----
+```javascript
+let count = 1
+// 这里把process稍做修改
+const process = (observer) => {
+		const paper = '这是一份报纸'
+		observer.next(paper);
+  	// 内部增加一行count++其他不变
+  	count++;
+}
 
-后面有时间再写。。。
+paperFactory.subscribe(paper => console.log(count + paper));
+// 过了0.5秒再触发
+setTimeout(() => {
+  paperFactory.subscribe(paper => console.log(count + paper));
+}, 500);
+
+// Logs:
+// （立即打印）：1 这是一份报纸
+// （0.5秒后打印）：2 这是一份报纸
+```
+
+以上，说明process每次都会被运行
+
+所以不妨尝试换一个思路，我报纸厂就每天早中晚定时生产3批，无论何时订阅，都不会立即生产，都在下一个批次的时候收到报纸
+
+⚠️当然这里有个bug，就是订阅后接下来的每一批生产出来的都会被订阅者收到，暂且理解为当天每个不同时间段发生的新闻吧，报纸内容会有所不同，所以当然后面的每一批都要发给订阅者
+
+```javascript
+import { Observable } from "rxjs";
+function sequenceProcess() {
+  const batch = ["早", "中", "晚"];
+  const customers = [];
+	let count = 0;
+  
+  return (customer) => {
+    customers.push(customer);
+    // 收到一个订阅的时候开始生产
+    if (customers.length === 1) {
+      setInterval(() => {
+        customers.forEach((_customer) => {
+          _customer.next(batch[count]);
+        });
+        count++;
+      }, 1000);
+    }
+  };
+}
+
+// 订阅
+const paperFactory = new Observable(sequenceProcess());
+paperFactory.subscribe((paper) => console.log("第一个用户：", paper));
+setTimeout(() => {
+  paperFactory.subscribe((paper) => console.log("第二个用户：", paper));
+}, 1500);
+
+// Logs:
+// 开始：第一个用户：早
+// 第二秒：第一个用户：中
+// 第二秒：第二个用户：中
+// 第三秒：第一个用户：晚
+// 第三秒：第二个用户：晚
+```
+
+⚠️上面的代码为了更直观的体现多播的核心思想，缺少了取消监听和取消计时器等其他细节
+
+### Observable和Subject的区别
+
+回到最开始的问题，实际上就是上面提到的多播，是rxjs库提供的一套处理多播的逻辑，具体使用方式参考[rxjs文档](https://cn.rx.js.org/)
+
+这里再补充一个`BehaviorSubject`，平时开发中用得最多的就这三个，用前面的例子来讲和`Subject`的区别就是，在订阅后`Subject`获得的是下一批次的报纸，而`BehaviorSubject`在等待后面批次的同时，**能立即获得最近一批已经生产好了的报纸**，换句话说也就是`BehaviorSubject`**能立即获得当前的值**
 
