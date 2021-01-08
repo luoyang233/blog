@@ -170,3 +170,170 @@ setTimeout(() => {
 
 这里再补充一个`BehaviorSubject`，平时开发中用得最多的就这三个，用前面的例子来讲和`Subject`的区别就是，在订阅后`Subject`获得的是下一批次的报纸，而`BehaviorSubject`在等待后面批次的同时，**能立即获得最近一批已经生产好了的报纸**，换句话说也就是`BehaviorSubject`**能立即获得当前的值**
 
+
+
+2020.1.8更新
+
+----
+
+### 重新定义Observable和Subject
+
+在深入看了rxjs文档之后，发现实际上他们并不是一个平级的关系，Subject实际上一种特殊的Observable，虽然这不影响上面例子的使用，但概念层面的还是弄清楚些为好。
+
+他们之间真正的区别实际上在与一**推**一**拉**，什么是推和拉
+
+|          | 生产者                             | 消费者                             |
+| -------- | ---------------------------------- | ---------------------------------- |
+| **拉取** | **被动的:** 当被请求时产生数据。   | **主动的:** 决定何时请求数据。     |
+| **推送** | **主动的:** 按自己的节奏产生数据。 | **被动的:** 对收到的数据做出反应。 |
+
+**什么是拉取？** - 在拉取体系中，由消费者来决定何时从生产者那里接收数据。生产者本身不知道数据是何时交付到消费者手中的。
+
+**什么是推送？** - 在推送体系中，由生产者来决定何时把数据发送给消费者。消费者本身不知道何时会接收到数据。
+
+#### Observable
+
+也就是说Observable是一个拉取的操作
+
+```javascript
+var foo = Rx.Observable.create(function (observer) {
+  console.log('Hello');
+  observer.next(42);
+});
+
+foo.subscribe(function (x) {
+  console.log(x);
+});
+
+//输出
+//"Hello"
+//42
+
+```
+
+在订阅者没有`subscribe`之前，是无法获取到生产者内部的值，而这里的`subscribe`恰恰就是**拉**的过程
+
+#### Subject
+
+Subject是一个推送的操作
+
+```javascript
+var subject = new Rx.Subject();
+
+subject.subscribe({
+  next: (v) => console.log('observerA: ' + v)
+});
+subject.subscribe({
+  next: (v) => console.log('observerB: ' + v)
+});
+```
+
+如果现在没有其他多余的代码，那么这段代码将没有任何输出结果，因为对与Subject而言这里的`subscribe`已经不在是拉取，而是**注册**，所以这正是Subject可以处理多播的原因。
+
+```javascript
+var subject = new Rx.Subject();
+
+subject.subscribe({
+  next: (v) => console.log('observerA: ' + v)
+});
+subject.subscribe({
+  next: (v) => console.log('observerB: ' + v)
+});
+
+subject.next(1);
+subject.next(2);
+
+//输出
+//observerA: 1
+//observerB: 1
+//observerA: 2
+//observerB: 2
+```
+
+`subject.next()`正是上面提到的**推**的这一过程，它会向所有注册过的消费者都推送该值过去。
+
+### Subject是一种特殊的Observable 
+
+之所以会这么说，是因为Subject同样可以作为消费者去拉取Observable中的值
+
+```javascript
+var subject = new Rx.Subject();
+
+subject.subscribe({
+  next: (v) => console.log('observerA: ' + v)
+});
+subject.subscribe({
+  next: (v) => console.log('observerB: ' + v)
+});
+
+var observable = Rx.Observable.from([1, 2, 3]);
+
+observable.subscribe(subject); 
+
+//输出
+//observerA: 1
+//observerB: 1
+//observerA: 2
+//observerB: 2
+//observerA: 3
+//observerB: 3
+```
+
+通过下面的流程图可以更加清晰的理解上面代码所实现的内容
+
+```mermaid
+graph LR
+Observable-->|2.被拉取的值|Subject
+Subject-->|1.拉取|Observable
+Subject-->|3.推送|订阅者A
+Subject-->|3.推送|订阅者B
+Subject-->|3.推送|订阅者...
+```
+
+### Observable不一定是异步的
+
+这是很容易搞混的一点，包括我自己，最开始的时候同样认为Observable是异步的，它和Promise类似，实际上当我们new一个promise的时候，promise内部首先会同步的执行一遍，Observable同样也是如此
+
+```javascript
+var observable = Rx.Observable.create(function (observer) {
+  observer.next(1);
+  observer.next(2);
+  observer.next(3);
+  setTimeout(() => {
+    observer.next(4);
+    observer.complete();
+  }, 1000);
+});
+
+console.log('just before subscribe');
+observable.subscribe({
+  next: x => console.log('got value ' + x),
+  error: err => console.error('something wrong occurred: ' + err),
+  complete: () => console.log('done'),
+});
+console.log('just after subscribe');
+
+```
+
+如果按照Observable是异步的去理解，那么输出的结果一定是
+
+```javascript
+// just before subscribe
+// just after subscribe
+// 。。。
+```
+
+但是实际结果是
+
+```javascript
+// just before subscribe
+// got value 1
+// got value 2
+// got value 3
+// just after subscribe
+// got value 4
+// done
+```
+
+很显然，Observable只是**可以做异步的事，但不一定是异步的**
+
