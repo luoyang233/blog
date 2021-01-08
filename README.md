@@ -38,3 +38,5 @@
 
 [理解node中的Buffer](https://github.com/luoyang233/blog/blob/master/others/node-buffer.md)
 
+[长列表渲染之时间分片](https://github.com/luoyang233/blog/blob/master/others/virtual1.md)
+
