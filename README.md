@@ -40,3 +40,5 @@
 
 [长列表渲染之时间分片](https://github.com/luoyang233/blog/blob/master/others/virtual1.md)
 
+[长列表渲染之虚拟渲染](https://github.com/luoyang233/blog/blob/master/others/virtual2.md)
+
