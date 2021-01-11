@@ -16,6 +16,23 @@
 
 <img src="https://github.com/luoyang233/blog/blob/master/images/virtual_3.jpg" alt="oauth2_2" style="zoom:50%;" />
 
+说完首次加载，再分析一下当滚动发生时，我们可以通过计算当前滚动值得知此时在屏幕`可见区域`应该显示的列表项。
+
+假设滚动发生，滚动条距顶部的位置为`150px`,则我们可得知在`可见区域`内的列表项为`第4项`至`第13项。
+
+<img src="https://github.com/luoyang233/blog/blob/master/images/virtual_4.jpg" alt="oauth2_2" style="zoom:50%;" />
+
+## 实现
+
+虚拟列表的实现，实际上就是在首屏加载的时候，只加载`可视区域`内需要的列表项，当滚动发生时，动态通过计算获得`可视区域`内的列表项，并将`非可视区域`内存在的列表项删除。
+
+- 计算当前`可视区域`起始数据索引(`startIndex`)
+- 计算当前`可视区域`结束数据索引(`endIndex`)
+- 计算当前`可视区域的`数据，并渲染到页面中
+- 计算`startIndex`对应的数据在整个列表中的偏移位置`startOffset`并设置到列表上
+
+<img src="https://github.com/luoyang233/blog/blob/master/images/virtual_5.jpg" alt="oauth2_2" style="zoom:50%;" />
+
 由于只是对`可视区域`内的列表项进行渲染，所以为了保持列表容器的高度并可正常的触发滚动，将Html结构设计成如下结构：
 
 ```html
