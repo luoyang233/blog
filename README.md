@@ -30,6 +30,8 @@
 
 [白话讲webpack（四）](https://github.com/luoyang233/blog/blob/master/engineering/webpack4.md)
 
+[搞懂 ESLint 和 Prettier](https://github.com/luoyang233/blog/blob/master/engineering/prettier.md)
+
 ## 随便记录一下
 
 [如何理解IaaS、SaaS、PaaS](https://github.com/luoyang233/blog/blob/master/others/service.md)
