@@ -36,6 +36,8 @@
 
 ## 随便记录一下
 
+[ts进阶](https://github.com/luoyang233/blog/blob/master/others/ts.md)
+
 [如何理解IaaS、SaaS、PaaS](https://github.com/luoyang233/blog/blob/master/others/service.md)
 
 [什么是OAuth2.0](https://github.com/luoyang233/blog/blob/master/others/oauth2.md)
