@@ -40,6 +40,8 @@
 
 ## 随便记录一下
 
+[你真的会使用XMLHttpRequest吗？](https://github.com/luoyang233/blog/blob/master/others/XMLHttpRequest.md)
+
 [ts进阶](https://github.com/luoyang233/blog/blob/master/others/ts.md)
 
 [如何理解IaaS、SaaS、PaaS](https://github.com/luoyang233/blog/blob/master/others/service.md)
