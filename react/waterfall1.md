@@ -390,7 +390,7 @@ const Waterfall = (props) => {
 
 ```
 
-转念一想，其实不管是直接传入url数组，还是map自定义children，在不同场合可能都有需求，所以决定组合一下，[瀑布流终极版](https://codesandbox.io/s/reactpubuliuzujianzhongjiban-o89x0)
+转念一想，其实不管是直接传入url数组，还是map自定义children，在不同场合可能都有需求，所以决定组合一下，[瀑布流4.0](https://codesandbox.io/s/reactpubuliuzujianzhongjiban-o89x0)
 
 ```tsx
 import React, { FC } from "react";
@@ -433,4 +433,120 @@ const Waterfall: FC<Props> = (props) => {
 
 export default Waterfall;
 
+```
+
+## 图片加载优化 
+
+> 前面的实现其实是有问题的，如果父组件中的source改变，会触发组件内部重新计算，但前面的图片依然会继续请求。
+>
+> 想象这么一个场景，一个每页有100张图片的瀑布流页面，用户在第一页还没完全加载完成之前，草草浏览了1.2秒立刻点到了第二页，这个时候第一页的图片请求还在继续请求，那么资源就会被占用，第二页不会立马呈现，需要等到第一页结束最大并发
+
+但图片请求的取消，没有直接有效的办法，或者通过`fetch`等额外方式来达到取消的目的，所以我的思路是每次并发请求一定数量的图片，在每一张图片开始前判断是否有更新，[图片加载优化](https://codesandbox.io/s/reactpubuliuzujianzhongjiban-forked-ribsz?file=/src/Waterfall.url.js)全部代码
+
+下面这段代码截取了一部分，重点在于**利用useEffect闭包对roundRef值的判断**
+
+```jsx
+const roundRef = useRef(Symbol());
+
+useEffect(() => {
+    roundRef.current = Symbol();
+  }, [source, cols]);
+
+useEffect(() => {
+    const MAX_CONCURRENT = 5;
+    const sourceCopy = [...source];
+    const round = roundRef.current;
+    const next = () => {
+      const abort = round !== roundRef.current;
+      if (sourceCopy.length && !abort) {
+        const url = sourceCopy.shift();
+        const img = new Image();
+        img.src = url;
+        img.onload = () => {
+          layoutImg(img);
+          next();
+        };
+        img.onerror = next;
+      }
+    };
+
+    for (let i = 0; i < MAX_CONCURRENT; i++) {
+      next();
+    }
+  }, [source, cols]);
+```
+
+## 实现图片按需加载
+
+> 假如整个页面有1000张图片，而用户就随便上下翻了翻前面的一部分图片，但按照上面的方式，依然会加载出后面的所有图片，这对服务器来说是不必要的开销，或者某些云服务器按量收费，那。。。
+
+所以我的思路是只加载视窗以内的图片，以及超过视窗的一部分，以作缓冲，随着用户向下滚动，再继续加载剩余的部分图片，[图片按需加载](https://codesandbox.io/s/tupianjiazaiyouhua-ribsz)
+
+下面贴的代码是修改的部分，逻辑不算复杂，再每次`next`时通过`isOverflow`判断是否需要继续加载，而`isOverflow`的判断条件就是**最短的一列的高度是否超过：容器高度+缓冲高度+滚动高度**
+
+最后再监听容器的滚动（可以加个节流，偷懒暂时没写）
+
+```jsx
+ useEffect(() => {
+    const getMinHeightColIndex = () => {
+      const minHeight = Math.min(...cols.map((c) => c.height));
+      const index = cols.findIndex((c) => c.height === minHeight);
+      return index;
+    };
+
+    const layoutImg = (img) => {
+      const index = getMinHeightColIndex();
+      cols[index].urls.push(img.src);
+      cols[index].height += img.width ? img.height * (width / img.width) : 0;
+      forceUpdate();
+    };
+
+    const isOverflow = () => {
+      const minHeight = Math.min(...cols.map((c) => c.height));
+      const { clientHeight, scrollTop } = containerRef.current;
+      const loadHeight = clientHeight + bufferHeight + scrollTop;
+      if (minHeight >= loadHeight) {
+        return true;
+      } else {
+        return false;
+      }
+    };
+
+    let concurrent = 0;
+    const MAX_CONCURRENT = 5;
+    const sourceCopy = [...source];
+    const round = roundRef.current;
+    const next = () => {
+      const abort = round !== roundRef.current;
+      const load = sourceCopy.length && !abort && !isOverflow();
+      if (!load) {
+        return;
+      }
+      if (concurrent >= MAX_CONCURRENT) {
+        return;
+      }
+      concurrent++;
+      const url = sourceCopy.shift();
+      const img = new Image();
+      img.src = url;
+      img.onload = () => {
+        concurrent--;
+        layoutImg(img);
+        next();
+      };
+      img.onerror = () => {
+        concurrent--;
+        next();
+      };
+      next();
+    };
+
+    next();
+
+    const containerDom = containerRef.current;
+    containerDom.addEventListener("scroll", next);
+    return () => {
+      containerDom.removeEventListener("scroll", next);
+    };
+  }, [source, cols]);
 ```
